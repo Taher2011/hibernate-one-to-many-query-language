@@ -23,7 +23,8 @@ public class Client {
 
 			EntityTransaction transaction = entityManager.getTransaction();
 
-			// getGuide(entityManager, transaction);
+			// getGuides(entityManager, transaction);
+			// getGuideById(entityManager, transaction);
 			// getGuideNames(entityManager, transaction);
 			// getGuideSalaryIs5000(entityManager, transaction);
 			// getGuideNamesAndSalary(entityManager, transaction);
@@ -42,6 +43,8 @@ public class Client {
 			// getStudentsWhoHaveNoGuide(entityManager, transaction);
 			// getGuidesWhoHaveNoStudents(entityManager, transaction);
 			// getGuidesWhoHaveStudentNameStartWithA(entityManager, transaction);
+			getStudentsAndAssociatedGuides(entityManager, transaction);
+			getStudentAndAssociatedGuidesByGuideId(entityManager, transaction);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -63,7 +66,7 @@ public class Client {
 		transaction.commit();
 	}
 
-	private static void getGuide(EntityManager entityManager, EntityTransaction transaction) {
+	private static void getGuides(EntityManager entityManager, EntityTransaction transaction) {
 		transaction.begin();
 		Query query = entityManager.createQuery("select guide from Guide as guide");
 		List<Guide> guides = query.getResultList();
@@ -71,6 +74,16 @@ public class Client {
 			System.out.println(guide);
 		}
 		transaction.commit();
+	}
+
+	private static Guide getGuideById(EntityManager entityManager, EntityTransaction transaction) {
+		transaction.begin();
+		Query query = entityManager.createQuery("select guide from Guide as guide where guide.id = :id");
+		query.setParameter("id", 2l);
+		Guide guide = (Guide) query.getSingleResult();
+		System.out.println(guide);
+		transaction.commit();
+		return guide;
 	}
 
 	private static void getGuideNames(EntityManager entityManager, EntityTransaction transaction) {
@@ -246,6 +259,31 @@ public class Client {
 		List<Object[]> guides = query.getResultList();
 		for (Object[] guide : guides) {
 			System.out.println("name " + guide[0] + " enrollmentId " + guide[1] + " studentName " + guide[2]);
+		}
+		transaction.commit();
+	}
+
+	private static void getStudentsAndAssociatedGuides(EntityManager entityManager, EntityTransaction transaction) {
+		Guide guide = getGuideById(entityManager, transaction);
+		transaction.begin();
+		Query query = entityManager.createQuery("select student from Student student where student.guide = :guide");
+		query.setParameter("guide", guide);
+		List<Student> students = query.getResultList();
+		for (Student student : students) {
+			System.out.println(student);
+		}
+		transaction.commit();
+	}
+
+	private static void getStudentAndAssociatedGuidesByGuideId(EntityManager entityManager,
+			EntityTransaction transaction) {
+		Guide guide = getGuideById(entityManager, transaction);
+		transaction.begin();
+		Query query = entityManager.createQuery("select student from Student student where student.guide.id = :id");
+		query.setParameter("id", guide.getId());
+		List<Student> students = query.getResultList();
+		for (Student student : students) {
+			System.out.println(student);
 		}
 		transaction.commit();
 	}
